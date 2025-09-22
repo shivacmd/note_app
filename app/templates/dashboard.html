@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h2>Welcome {{ user.username }}</h2>
+  <div class="breadcrumb">
+    <span>Dashboard</span>
+  </div>
+</div>
+
+{% if request.query_params.get("msg") %}
+  <div class="success">{{ request.query_params.get("msg") }}</div>
+{% endif %}
+
+<div class="dashboard-buttons">
+  {% if user.role == "user" %}
+    <h3>👤 My Workspace</h3>
+    <p><a href="/notes/my" class="btn btn-primary btn-lg">📝 View My Notes</a></p>
+    <p><a href="/note/create" class="btn btn-success btn-lg">➕ Create New Note</a></p>
+  {% else %}
+    <h3>🔥 Super Admin Control Panel</h3>
+    <div class="superadmin-info mb-3">
+      👑 You have read-only access to all user notes
+    </div>
+    <div class="card">
+      <p><a href="/notes/all" class="btn btn-primary btn-lg">👁️ View All Notes</a></p>
+    </div>
+  {% endif %}
+  <div class="form-actions mt-3">
+    <a href="/logout" class="btn btn-info">🚪 Logout</a>
+  </div>
+</div>
+{% endblock %}

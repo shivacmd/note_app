@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>📝 My Notes ({{ user.username }})</h2>
+  <p class="menu"><a href="/dashboard">⬅ Back to Dashboard</a> | <a href="/logout">Logout</a></p>
+
+  {% if request.query_params.get("msg") %}
+    <p class="success">{{ request.query_params.get("msg") }}</p>
+  {% endif %}
+
+  <form method="get" action="/notes/my" class="form-group">
+    <input name="search" placeholder="Search my notes" value="{{ search or '' }}"/>
+    <button type="submit">Search</button>
+  </form>
+
+  <ul class="note-list">
+    {% for note in notes %}
+      <li class="note-item">
+        <div>
+          <a href="/note/{{ note.id }}" class="note-title">{{ note.title }}</a>
+        </div>
+        {% if user.role == "user" %}
+          <div class="note-actions">
+            <a href="/note/{{ note.id }}/edit" class="btn btn-primary btn-sm">Edit</a>
+            <a href="/note/{{ note.id }}/delete" class="btn btn-danger btn-sm">Delete</a>
+          </div>
+        {% endif %}
+      </li>
+    {% else %}
+      <li class="note-empty">No notes found.</li>
+    {% endfor %}
+  </ul>
+
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="/notes/my?page={{ page-1 }}{% if search %}&search={{search}}{% endif %}">Prev</a>
+    {% endif %}
+    <span>Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+      <a href="/notes/my?page={{ page+1 }}{% if search %}&search={{search}}{% endif %}">Next</a>
+    {% endif %}
+  </div>
+
+  {% if user.role == "user" %}
+    <div class="form-actions">
+      <a href="/note/create" class="btn btn-success">➕ Create New Note</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

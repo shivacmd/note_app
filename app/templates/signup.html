@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-form">
+  <h2>📝 Sign Up</h2>
+  
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/signup" id="signupForm">
+    <div class="form-group">
+      <input name="username" placeholder="Username" 
+             value="{{ request.form.username if request.form else '' }}" 
+             required minlength="3" maxlength="50" id="username" />
+      <div class="validation-feedback" id="usernameFeedback"></div>
+      <small style="color: #666; font-size: 12px;">3-50 characters, letters and numbers only</small>
+    </div>
+    
+    <div class="form-group">
+      <input name="email" type="email" placeholder="Email" 
+             value="{{ request.form.email if request.form else '' }}" 
+             required id="email" />
+      <div class="validation-feedback" id="emailFeedback"></div>
+      <small style="color: #666; font-size: 12px;">We'll never share your email</small>
+    </div>
+    
+    <div class="form-group">
+      <input name="password" type="password" placeholder="Password" 
+             required minlength="8" id="password" />
+      <div class="validation-feedback" id="passwordFeedback"></div>
+      <small style="color: #666; font-size: 12px;">
+        • At least 8 characters<br>
+        • 1 uppercase letter (A-Z)<br>
+        • 1 lowercase letter (a-z)<br>
+        • 1 number (0-9)<br>
+        • 1 special character (!@#$%^&*)
+      </small>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-success btn-lg">Create Account</button>
+    </div>
+  </form>
+  
+  <div class="text-center mt-3">
+    <p><a href="/login">Already have an account? Login</a></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('signupForm');
+    const username = document.getElementById('username');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    
+    function showFeedback(element, message, type) {
+        const feedback = element.parentNode.querySelector('.validation-feedback');
+        if (feedback) {
+            feedback.textContent = message;
+            feedback.className = `validation-feedback ${type}`;
+        }
+        
+        // Style the input
+        const input = element.parentNode.querySelector('input');
+        if (type === 'success') {
+            input.style.borderColor = '#28a745';
+        } else if (type === 'error') {
+            input.style.borderColor = '#dc3545';
+        } else {
+            input.style.borderColor = '';
+        }
+    }
+    
+    // Username validation
+    username.addEventListener('blur', function() {
+        const value = this.value;
+        if (value.length < 3) {
+            showFeedback(this, 'Username must be at least 3 characters', 'error');
+        } else if (value.length > 50) {
+            showFeedback(this, 'Username must be less than 50 characters', 'error');
+        } else {
+            showFeedback(this, 'Username is valid', 'success');
+        }
+    });
+    
+    // Email validation
+    email.addEventListener('blur', function() {
+        const value = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showFeedback(this, 'Please enter a valid email address', 'error');
+        } else {
+            showFeedback(this, 'Email is valid', 'success');
+        }
+    });
+    
+    // Password validation
+    password.addEventListener('input', function() {
+        const value = this.value;
+        const requirements = {
+            length: value.length >= 8,
+            uppercase: /[A-Z]/.test(value),
+            lowercase: /[a-z]/.test(value),
+            number: /\d/.test(value),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(value)
+        };
+        
+        const metCount = Object.values(requirements).filter(Boolean).length;
+        if (metCount === 5) {
+            showFeedback(this, '✅ Strong password - all requirements met!', 'success');
+        } else {
+            const missing = [];
+            if (!requirements.length) missing.push('8+ characters');
+            if (!requirements.uppercase) missing.push('uppercase letter');
+            if (!requirements.lowercase) missing.push('lowercase letter');
+            if (!requirements.number) missing.push('number');
+            if (!requirements.special) missing.push('special character');
+            showFeedback(this, `⚠️ Missing ${missing.length > 1 ? 'requirements' : 'requirement'}: ${missing.join(', ')}`, 'error');
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+        
+        // Basic checks
+        if (username.value.length < 3) {
+            valid = false;
+            showFeedback(username, 'Username too short', 'error');
+        }
+        if (password.value.length < 8) {
+            valid = false;
+            showFeedback(password, 'Password too short', 'error');
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+            alert('Please fix the errors above');
+        }
+    });
+});
+</script>
+
+<style>
+.validation-feedback {
+    font-size: 12px;
+    margin-top: 5px;
+    padding: 2px 0;
+    min-height: 16px;
+}
+
+.validation-feedback.success {
+    color: #28a745;
+}
+
+.validation-feedback.error {
+    color: #dc3545;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

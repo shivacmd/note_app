@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h2>{{ note.title }}</h2>
+  <p>{{ note.content }}</p>
+  <p class="note-meta">
+    Created: {{ note.created_at.strftime('%Y-%m-%d %H:%M') }} | 
+    Updated: {{ note.updated_at.strftime('%Y-%m-%d %H:%M') }}
+  </p>
+
+  {% if user and user.role == "superadmin" and note.owner_id != user.id %}
+    <p class="superadmin-info">
+      👁️ Viewing note by {{ note.owner.username }} (read-only)
+    </p>
+  {% endif %}
+
+  <div class="form-actions">
+    {% if user and user.role == "user" and note.owner_id == user.id %}
+      <a href="/note/{{ note.id }}/edit" class="btn btn-primary btn-sm">Edit</a>
+      <a href="/note/{{ note.id }}/delete" class="btn btn-danger btn-sm">Delete</a>
+      <a href="/notes/my" class="btn btn-secondary btn-sm">Back to My Notes</a>
+    {% elif user and user.role == "superadmin" %}
+      <a href="/notes/all" class="btn btn-secondary btn-sm">Back to All Notes</a>
+    {% else %}
+      <a href="/notes/my" class="btn btn-secondary btn-sm">Back to My Notes</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
