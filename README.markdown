@@ -109,73 +109,11 @@ A modern, secure web application for creating and managing notes, built with Fas
    - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - Deploy and access at `https://your-app.onrender.com`.
 
-3. **Seed Admin Accounts**:
-   - **Automatic (via `ADMIN_ACCOUNTS`)**:
-     - Ensure `main.py` has this startup hook:
-       ```python
-       import json
-       @app.on_event("startup")
-       async def startup():
-           Base.metadata.create_all(bind=engine)
-           db = SessionLocal()
-           try:
-               admin_accounts_json = os.getenv("ADMIN_ACCOUNTS")
-               if admin_accounts_json:
-                   admin_accounts = json.loads(admin_accounts_json)
-                   for admin in admin_accounts:
-                       email = admin.get("email")
-                       password = admin.get("password")
-                       username = admin.get("username", "admin_" + email.split("@")[0])
-                       if not email or not password:
-                           print(f"❌ Invalid admin entry: {admin}")
-                           continue
-                       if not crud.get_user_by_email(db, email):
-                           admin_in = schemas.UserCreate(username=username, email=email, password=password)
-                           crud.create_user(db, admin_in, role="superadmin")
-                           print(f"✅ Admin created: {email}")
-                       else:
-                           print(f"ℹ️ Admin exists: {email}")
-           except Exception as e:
-               print(f"❌ Admin seeding failed: {e}")
-           finally:
-               db.close()
-       ```
-     - Deploy; check Render logs for "Admin created".
-     - Remove `ADMIN_ACCOUNTS` after first deploy.
+3.
    - **Manual (Render Shell)**:
-     - Update `seed_admin.py`:
-       ```python
-       import os
-       from dotenv import load_dotenv
-       from sqlalchemy import create_engine
-       from sqlalchemy.orm import sessionmaker
-       from app.database import Base
-       from app import crud, schemas
-       load_dotenv()
-       DATABASE_URL = os.getenv("DATABASE_URL")
-       engine = create_engine(DATABASE_URL)
-       SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-       Base.metadata.create_all(bind=engine)
-       db = SessionLocal()
-       try:
-           email = "admin@example.com"
-           password = "@Admin123"
-           username = "admin"
-           if not crud.get_user_by_email(db, email):
-               admin_in = schemas.UserCreate(username=username, email=email, password=password)
-               crud.create_user(db, admin_in, role="superadmin")
-               print(f"✅ Admin created: {email}")
-           else:
-               print(f"ℹ️ Admin exists: {email}")
-       except Exception as e:
-           print(f"❌ Error: {e}")
-       finally:
-           db.close()
-       ```
-     - In Render Dashboard > Shell, run:
-       ```bash
-       python seed_admin.py
-       ```
+     - I created seed_admin file to create the superadmin. But when i deploy the code , i am not able to run this file.
+     - Since I can not run it , and also to run it in the render shell , it is asking for subscriotion
+     - So i added a row in the database for super admin.
 
 ## 📖 Usage
 - **Signup**: `/signup` (creates `user` role).
